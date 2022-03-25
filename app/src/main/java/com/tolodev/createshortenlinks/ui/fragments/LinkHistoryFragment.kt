@@ -6,16 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.tolodev.createshortenlinks.R
 import com.tolodev.createshortenlinks.databinding.FragmentLinkHistoryBinding
 import com.tolodev.createshortenlinks.ui.adapter.LinkHistoryAdapter
-import com.tolodev.createshortenlinks.ui.models.UIShortenLink
+import com.tolodev.createshortenlinks.ui.models.GenericItem
 import com.tolodev.createshortenlinks.ui.models.UIStatus
 import com.tolodev.createshortenlinks.ui.viewModel.LinkHistoryViewModel
 import com.tolodev.createshortenlinks.ui.views.LinkGeneratorLoader
+import com.tolodev.createshortenlinks.utils.bundleToMap
+import com.tolodev.createshortenlinks.utils.mapToBundle
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
@@ -29,15 +32,7 @@ class LinkHistoryFragment : Fragment() {
     private var defaultLoader: LinkGeneratorLoader? = null
 
     private val linkHistoryAdapter: LinkHistoryAdapter by lazy {
-        LinkHistoryAdapter {
-            showLinkDetail(
-                it
-            )
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        LinkHistoryAdapter()
     }
 
     override fun onCreateView(
@@ -50,18 +45,41 @@ class LinkHistoryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initView()
+        updateView()
         initListeners()
         subscribe()
     }
 
+    private fun initView() {
+        binding?.recyclerViewLinkHistory?.adapter = linkHistoryAdapter
+        binding?.recyclerViewLinkHistory?.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                DividerItemDecoration.VERTICAL
+            )
+        )
+    }
+
     private fun subscribe() {
-        viewModel.uiStatusObserver().observe(viewLifecycleOwner, ::handleUIStatus)
+        with(viewModel) {
+            uiStatusObserver().observe(viewLifecycleOwner, ::handleUIStatus)
+            loadShortenLinkListObserver().observe(viewLifecycleOwner) {
+                linkHistoryAdapter.setLinks(it)
+                updateView()
+            }
+        }
     }
 
     private fun initListeners() {
-        binding?.imageButtonGenerate?.setOnClickListener {
+        binding?.imageButtonGenerateShortenLink?.setOnClickListener {
             generateShortLink()
         }
+    }
+
+    private fun updateView() {
+        binding?.imageViewIllustration?.isVisible = !linkHistoryAdapter.hasLinks()
+        binding?.recyclerViewLinkHistory?.isVisible = linkHistoryAdapter.hasLinks()
     }
 
     private fun generateShortLink() {
@@ -73,7 +91,7 @@ class LinkHistoryFragment : Fragment() {
         handleFormUI(isValidUrl)
     }
 
-    private fun handleUIStatus(uiStatus: UIStatus<UIShortenLink>) {
+    private fun handleUIStatus(uiStatus: UIStatus<GenericItem>) {
         when (uiStatus) {
             is UIStatus.Successful -> showLinks(uiStatus.value)
             is UIStatus.Loading -> showLoading(uiStatus.show)
@@ -81,25 +99,16 @@ class LinkHistoryFragment : Fragment() {
         }
     }
 
-    private fun showLinks(uiShortenLink: UIShortenLink) {
+    private fun showLinks(genericItem: GenericItem) {
         showLoading(false)
-        binding?.recyclerViewLinkHistory?.adapter = linkHistoryAdapter
-        binding?.recyclerViewLinkHistory?.addItemDecoration(
-            DividerItemDecoration(
-                context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
-        linkHistoryAdapter.addLink(uiShortenLink)
-
-//        binding?.recyclerViewLinkHistory?.isVisible = products.isNotEmpty()
-//        binding?.groupLinks?.isVisible = products.isEmpty()
+        linkHistoryAdapter.addLink(genericItem)
+        updateView()
     }
 
     private fun handleFormUI(validUrlOrFocus: Boolean) {
         context?.let {
-            binding?.editTextTypeLink?.let {editTextTypeLink ->
-                with(editTextTypeLink){
+            binding?.editTextTypeLink?.let { editTextTypeLink ->
+                with(editTextTypeLink) {
                     if (validUrlOrFocus) {
                         setHintTextColor(
                             ContextCompat.getColor(
@@ -119,10 +128,10 @@ class LinkHistoryFragment : Fragment() {
                             R.drawable.bg_outlined_input_box
                         )
                         text = null
-                        setHintTextColor(ContextCompat.getColor(this@MainActivity, R.color.red))
+                        setHintTextColor(ContextCompat.getColor(context, R.color.red))
                         hint = getString(R.string.copy_type_link)
                         clearFocus()
-                        binding?.imageButtonGenerate?.requestFocus()
+                        binding?.imageButtonGenerateShortenLink?.requestFocus()
                     }
                 }
             }
@@ -132,10 +141,6 @@ class LinkHistoryFragment : Fragment() {
     private fun showError(uiStatus: UIStatus.Error) {
         showLoading(false)
         Toast.makeText(context, uiStatus.msg, Toast.LENGTH_LONG).show()
-    }
-
-    private fun showLinkDetail(linkId: String) {
-        Timber.e("Show product detail")
     }
 
     private fun showLoading(showing: Boolean) {
@@ -160,5 +165,15 @@ class LinkHistoryFragment : Fragment() {
                 )
             )
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putAll(mapToBundle(viewModel.setInstanceState()))
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        savedInstanceState?.let { viewModel.restoreInstanceState(bundleToMap(it)) }
+        super.onViewStateRestored(savedInstanceState)
     }
 }

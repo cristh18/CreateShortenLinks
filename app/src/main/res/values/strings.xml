@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">CreateShortenLinks</string>
+    <string name="app_name" translatable="false">CreateShortenLinks</string>
 
+    <string name="image_illustration" translatable="false">illustration</string>
     <string name="copy_type_link_hint">Shorten a link here…</string>
+    <string name="copy_type_link">Please add a link here</string>
+    <string name="copy_link_history_title">Recently shortened URLs</string>
 </resources>

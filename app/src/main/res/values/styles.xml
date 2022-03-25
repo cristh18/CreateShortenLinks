@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextXmicro">
+        <item name="android:textSize">@dimen/font_caption3</item>
+    </style>
+
+    <style name="TextMicro">
+        <item name="android:textSize">@dimen/font_caption2</item>
+    </style>
+
+    <style name="TextSmall">
+        <item name="android:textSize">@dimen/font_caption1</item>
+    </style>
+
+    <style name="TextNormal">
+        <item name="android:textSize">@dimen/font_body</item>
+    </style>
+
+    <style name="TextBig">
+        <item name="android:textSize">@dimen/font_h4</item>
+    </style>
+
+    <style name="TextHuge">
+        <item name="android:textSize">@dimen/font_h3</item>
+    </style>
+
+    <style name="TextExtraHuge">
+        <item name="android:textSize">@dimen/font_h2</item>
+    </style>
+
+    <style name="TextTitle">
+        <item name="android:textSize">@dimen/font_h2</item>
+    </style>
+
+    <style name="TextBigTitle">
+        <item name="android:textSize">@dimen/font_h1</item>
+    </style>
+
+    <style name="TextSubtitle">
+        <item name="android:textSize">@dimen/font_subtitle</item>
+    </style>
+
+    <style name="TextNormal.Black" parent="TextNormal">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextNormal.Black.Bold" parent="TextNormal">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextNormal.Green" parent="TextNormal">
+        <item name="android:textColor">@color/green</item>
+    </style>
+
+    <style name="TextBig.Black" parent="TextBig">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextBig.Black.Bold" parent="TextBig">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>

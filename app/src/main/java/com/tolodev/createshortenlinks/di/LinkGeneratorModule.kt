@@ -3,7 +3,9 @@ package com.tolodev.createshortenlinks.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tolodev.createshortenlinks.BuildConfig
+import com.tolodev.createshortenlinks.data.datasources.LinkGeneratorDBDataSource
 import com.tolodev.createshortenlinks.data.datasources.LinkGeneratorServerDataSource
+import com.tolodev.createshortenlinks.data.datasources.LocalDataSource
 import com.tolodev.createshortenlinks.data.datasources.RemoteDataSource
 import com.tolodev.createshortenlinks.data.server.LinkGeneratorService
 import dagger.Module
