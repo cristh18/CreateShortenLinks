@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CreateShortenLinks</string>
+
+    <string name="copy_type_link_hint">Shorten a link here…</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/textView_short_link"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:autoLink="web"
+    android:fontFamily="@font/poppins_regular"
+    android:paddingStart="@dimen/spacing_large"
+    android:paddingTop="@dimen/spacing_standard"
+    android:paddingEnd="@dimen/spacing_large"
+    android:paddingBottom="@dimen/spacing_standard"
+    android:textAlignment="center"
+    android:textColor="@color/cyan"
+    tools:text="http://www.google.com" />
