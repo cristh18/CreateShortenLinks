@@ -7,7 +7,7 @@ import javax.inject.Singleton
 @Singleton
 class LinkGeneratorDBDataSource @Inject constructor() : LocalDataSource {
 
-    private val shortenLinkList: MutableList<ShortenLink> = mutableListOf()
+    private val shortenLinkList: MutableSet<ShortenLink> = mutableSetOf()
 
     override fun saveShortenLink(shortenLink: ShortenLink) {
         shortenLinkList += shortenLink
@@ -17,7 +17,7 @@ class LinkGeneratorDBDataSource @Inject constructor() : LocalDataSource {
         return shortenLinkList.firstOrNull { shortenLinkId.equals(it.id, true) }
     }
 
-    override fun getShortenLinkList(): List<ShortenLink> {
+    override fun getShortenLinkList(): Set<ShortenLink> {
         return shortenLinkList
     }
 

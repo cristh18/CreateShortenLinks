@@ -27,7 +27,7 @@ class GetShortenLinkListUseCaseTest {
         serverShortenLink?.let {
             val shortenLink = it.toDomainShortenLink()
 
-            every { repository.getShortenLinkList() } returns listOf(shortenLink)
+            every { repository.getShortenLinkList() } returns setOf(shortenLink)
 
             val useCase = GetShortenLinkListUseCase(repository)
 

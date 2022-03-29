@@ -15,7 +15,7 @@ class LocalLinkGeneratorRepository @Inject constructor(private val dataSource: L
         return dataSource.getShortenLinkById(shortenLinkId)
     }
 
-    override fun getShortenLinkList(): List<ShortenLink> {
+    override fun getShortenLinkList(): Set<ShortenLink> {
         return dataSource.getShortenLinkList()
     }
 

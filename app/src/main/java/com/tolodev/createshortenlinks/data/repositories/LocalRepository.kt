@@ -8,7 +8,7 @@ interface LocalRepository {
 
     fun getShortenLinkById(shortenLinkId: String): ShortenLink?
 
-    fun getShortenLinkList(): List<ShortenLink>
+    fun getShortenLinkList(): Set<ShortenLink>
 
     fun deleteAllShortenLinks()
 }
