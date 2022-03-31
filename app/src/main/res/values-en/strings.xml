@@ -1,0 +1,5 @@
+<resources>
+    <string name="copy_type_link_hint">Shorten a link here…</string>
+    <string name="copy_type_link">Please add a link here</string>
+    <string name="copy_link_history_title">Recently shortened URLs</string>
+</resources>

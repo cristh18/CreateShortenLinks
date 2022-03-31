@@ -8,5 +8,5 @@ import retrofit2.http.POST
 interface LinkGeneratorService {
 
     @POST("api/alias")
-    suspend fun getShortenLink(@Body linkRequest: LinkRequest): LinkGeneratorResponse
+    suspend fun generateShortenLink(@Body linkRequest: LinkRequest): LinkGeneratorResponse
 }

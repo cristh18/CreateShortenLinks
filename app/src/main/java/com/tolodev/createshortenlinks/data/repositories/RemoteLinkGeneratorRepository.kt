@@ -6,8 +6,9 @@ import com.tolodev.createshortenlinks.data.toDomainShortenLink
 import com.tolodev.createshortenlinks.domain.ShortenLink
 import javax.inject.Inject
 
-class LinkGeneratorRepository @Inject constructor(private val dataSource: LinkGeneratorServerDataSource) {
+class RemoteLinkGeneratorRepository @Inject constructor(private val dataSource: LinkGeneratorServerDataSource) :
+    RemoteRepository {
 
-    suspend fun getShortenLink(linkRequest: LinkRequest): ShortenLink =
-        dataSource.getShortenLink(linkRequest).toDomainShortenLink()
+    override suspend fun generateShortenLink(linkRequest: LinkRequest): ShortenLink =
+        dataSource.generateShortenLink(linkRequest).toDomainShortenLink()
 }
