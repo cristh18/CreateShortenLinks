@@ -1,16 +1,19 @@
 package com.tolodev.createshortenlinks.useCases
 
+import com.tolodev.createshortenlinks.data.repositories.LocalLinkGeneratorRepository
 import com.tolodev.createshortenlinks.data.repositories.RemoteLinkGeneratorRepository
 import com.tolodev.createshortenlinks.data.server.models.LinkRequest
 import com.tolodev.createshortenlinks.data.toDomainShortenLink
+import com.tolodev.createshortenlinks.domain.ShortenLinkResult
 import com.tolodev.createshortenlinks.extensions.readFromJsonFile
 import com.tolodev.createshortenlinks.ui.models.toUIShortenLink
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -19,7 +22,10 @@ import org.junit.Test
 class GenerateShortenLinkUseCaseTest {
 
     @MockK
-    private lateinit var repository: RemoteLinkGeneratorRepository
+    private lateinit var remoteRepository: RemoteLinkGeneratorRepository
+
+    @MockK
+    private lateinit var localRepository: LocalLinkGeneratorRepository
 
     @Before
     fun setUp() {
@@ -28,6 +34,7 @@ class GenerateShortenLinkUseCaseTest {
 
     @Test
     fun `generate shorten link successfully`() {
+        val linkId = "70993"
         val originalLink = "https://plugins.jetbrains.com/plugin/10761-detekt"
         val linkRequest = LinkRequest(originalLink)
         val serverShortenLink = readFromJsonFile("link_generator.json")
@@ -35,13 +42,18 @@ class GenerateShortenLinkUseCaseTest {
             val shortenLink = it.toDomainShortenLink()
             val uiShortenLink = shortenLink.toUIShortenLink()
 
-            coEvery { repository.generateShortenLink(linkRequest) } returns shortenLink
+            coEvery { remoteRepository.generateShortenLink(linkRequest) } returns shortenLink
+            every { localRepository.saveShortenLink(shortenLink) } returns Unit
+            every { localRepository.getShortenLinkById(linkId) } returns shortenLink
+            every { localRepository.getLastShortenedLink() } returns shortenLink
 
-            val useCase = GenerateShortenLinkUseCase(repository)
+            val useCase = GenerateShortenLinkUseCase(remoteRepository, localRepository)
 
-            runBlockingTest {
+            runTest {
                 val shortenLinkGenerated = useCase.invoke(originalLink).first()
-                assertEquals(shortenLinkGenerated, uiShortenLink)
+                if (shortenLinkGenerated is ShortenLinkResult.Success) {
+                    assertEquals(shortenLinkGenerated.data, uiShortenLink)
+                }
             }
         }
     }

@@ -6,11 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tolodev.createshortenlinks.domain.ShortenLinkResult
 import com.tolodev.createshortenlinks.ui.models.GenericItem
+import com.tolodev.createshortenlinks.ui.models.GenericItem.UIShortenLink
 import com.tolodev.createshortenlinks.ui.models.UIStatus
 import com.tolodev.createshortenlinks.useCases.DeleteAllShortenLinkUseCase
 import com.tolodev.createshortenlinks.useCases.GenerateShortenLinkUseCase
-import com.tolodev.createshortenlinks.useCases.GetShortenLinkByIdUseCase
+import com.tolodev.createshortenlinks.useCases.GetLastShortenedLinkUseCase
 import com.tolodev.createshortenlinks.useCases.GetShortenLinkListUseCase
 import com.tolodev.createshortenlinks.useCases.SaveShortenLinkUseCase
 import com.tolodev.createshortenlinks.utils.getHttpErrorMessage
@@ -31,34 +33,37 @@ private const val KEY_LINK_LIST = "key_link_list"
 class LinkHistoryViewModel @Inject constructor(
     private val generateShortenLinkUseCase: GenerateShortenLinkUseCase,
     private val saveShortenLinkUseCase: SaveShortenLinkUseCase,
-    private val getShortenLinkByIdUseCase: GetShortenLinkByIdUseCase,
     private val getShortenLinkListUseCase: GetShortenLinkListUseCase,
-    private val deleteAllShortenLinkUseCase: DeleteAllShortenLinkUseCase
+    private val deleteAllShortenLinkUseCase: DeleteAllShortenLinkUseCase,
+    private val getLastShortenedLinkUseCase: GetLastShortenedLinkUseCase,
 ) :
     ViewModel() {
 
     private val _uiStatus = MutableLiveData<UIStatus<GenericItem>>()
 
-    private val _loadShortenLinkList = MutableLiveData<List<GenericItem>>()
-
     init {
-        _loadShortenLinkList.postValue(getShortenLinkListUseCase.invoke())
+        loadLatestShortenedLink()
+    }
+
+    private fun loadLatestShortenedLink() {
+        getLastShortenedLinkUseCase.invoke()?.let {
+            _uiStatus.value = UIStatus.Successful(it)
+        }
     }
 
     fun generateShortenLink(link: String) {
         viewModelScope.launch {
             getShortenLinkFlow(link).collect {
-                saveShortenLinkUseCase.invoke(it)
-                getShortenLinkByIdUseCase.invoke(it.id)?.let { generatedShortenLink ->
-                    _uiStatus.value = UIStatus.Successful(generatedShortenLink)
-                } ?: run {
-                    _uiStatus.value = UIStatus.Error("Link not found")
+                if (it is ShortenLinkResult.Success) {
+                    _uiStatus.value = UIStatus.Successful(it.data)
+                } else if (it is ShortenLinkResult.Error) {
+                    _uiStatus.value = UIStatus.Error(it.exception.message.orEmpty(), it.exception)
                 }
             }
         }
     }
 
-    private fun getShortenLinkFlow(productName: String): Flow<GenericItem.UIShortenLink> =
+    private fun getShortenLinkFlow(productName: String): Flow<ShortenLinkResult<UIShortenLink>> =
         generateShortenLinkUseCase.invoke(productName)
             .onStart { _uiStatus.postValue(UIStatus.Loading(true)) }
             .flowOn(Dispatchers.IO)
@@ -74,6 +79,10 @@ class LinkHistoryViewModel @Inject constructor(
         return url.isNotEmpty() && URLUtil.isValidUrl(url)
     }
 
+    fun hasLinks(): Boolean {
+        return getShortenLinkListUseCase.invoke().isNotEmpty()
+    }
+
     fun setInstanceState(): MutableMap<String, Any?> {
         val saveStateData = mutableMapOf<String, Any?>()
         saveStateData[KEY_LINK_LIST] = getShortenLinkListUseCase.invoke()
@@ -86,18 +95,15 @@ class LinkHistoryViewModel @Inject constructor(
             if (shortenLinkList.isNotEmpty()) {
                 deleteAllShortenLinkUseCase.invoke()
                 shortenLinkList.forEach {
-                    if (it is GenericItem.UIShortenLink) {
+                    if (it is UIShortenLink) {
                         saveShortenLinkUseCase.invoke(it)
                     }
                 }
-                _loadShortenLinkList.postValue(getShortenLinkListUseCase.invoke())
+                loadLatestShortenedLink()
             }
         }
     }
 
     @CheckResult
     fun uiStatusObserver(): LiveData<UIStatus<GenericItem>> = _uiStatus
-
-    @CheckResult
-    fun loadShortenLinkListObserver(): LiveData<List<GenericItem>> = _loadShortenLinkList
 }

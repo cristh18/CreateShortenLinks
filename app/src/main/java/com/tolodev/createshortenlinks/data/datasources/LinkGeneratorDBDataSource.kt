@@ -24,4 +24,8 @@ class LinkGeneratorDBDataSource @Inject constructor() : LocalDataSource {
     override fun deleteAllShortenLinks() {
         shortenLinkList.clear()
     }
+
+    override fun getLastShortenedLink(): ShortenLink? {
+        return shortenLinkList.lastOrNull()
+    }
 }

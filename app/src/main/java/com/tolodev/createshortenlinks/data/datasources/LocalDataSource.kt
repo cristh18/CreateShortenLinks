@@ -11,4 +11,6 @@ interface LocalDataSource {
     fun getShortenLinkList(): Set<ShortenLink>
 
     fun deleteAllShortenLinks()
+
+    fun getLastShortenedLink(): ShortenLink?
 }

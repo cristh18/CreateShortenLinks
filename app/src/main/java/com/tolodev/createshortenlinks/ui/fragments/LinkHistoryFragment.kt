@@ -9,16 +9,16 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.DividerItemDecoration
 import com.tolodev.createshortenlinks.R
 import com.tolodev.createshortenlinks.databinding.FragmentLinkHistoryBinding
-import com.tolodev.createshortenlinks.ui.adapter.LinkHistoryAdapter
+import com.tolodev.createshortenlinks.extensions.hideKeyboard
 import com.tolodev.createshortenlinks.ui.models.GenericItem
 import com.tolodev.createshortenlinks.ui.models.UIStatus
 import com.tolodev.createshortenlinks.ui.viewModel.LinkHistoryViewModel
 import com.tolodev.createshortenlinks.ui.views.LinkGeneratorLoader
 import com.tolodev.createshortenlinks.utils.bundleToMap
 import com.tolodev.createshortenlinks.utils.mapToBundle
+import com.tolodev.createshortenlinks.utils.startDestination
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
@@ -31,10 +31,6 @@ class LinkHistoryFragment : Fragment() {
 
     private var defaultLoader: LinkGeneratorLoader? = null
 
-    private val linkHistoryAdapter: LinkHistoryAdapter by lazy {
-        LinkHistoryAdapter()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -45,29 +41,14 @@ class LinkHistoryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
         updateView()
         initListeners()
         subscribe()
     }
 
-    private fun initView() {
-        binding?.recyclerViewLinkHistory?.adapter = linkHistoryAdapter
-        binding?.recyclerViewLinkHistory?.addItemDecoration(
-            DividerItemDecoration(
-                context,
-                DividerItemDecoration.VERTICAL
-            )
-        )
-    }
-
     private fun subscribe() {
         with(viewModel) {
             uiStatusObserver().observe(viewLifecycleOwner, ::handleUIStatus)
-            loadShortenLinkListObserver().observe(viewLifecycleOwner) {
-                linkHistoryAdapter.setLinks(it)
-                updateView()
-            }
         }
     }
 
@@ -75,11 +56,19 @@ class LinkHistoryFragment : Fragment() {
         binding?.imageButtonGenerateShortenLink?.setOnClickListener {
             generateShortLink()
         }
+        binding?.buttonWatchLinks?.setOnClickListener {
+            startDestination(
+                LinkHistoryFragmentDirections.actionLinkHistoryFragmentToLinkDetailFragment(),
+                this
+            )
+        }
     }
 
     private fun updateView() {
-        binding?.imageViewIllustration?.isVisible = !linkHistoryAdapter.hasLinks()
-        binding?.recyclerViewLinkHistory?.isVisible = linkHistoryAdapter.hasLinks()
+        binding?.imageViewIllustration?.isVisible = !viewModel.hasLinks()
+        binding?.layoutLastShortenedLink?.textViewShortLink?.isVisible =
+            viewModel.hasLinks()
+        binding?.layoutLastShortenedLink?.textViewLinkId?.isVisible = viewModel.hasLinks()
     }
 
     private fun generateShortLink() {
@@ -101,7 +90,11 @@ class LinkHistoryFragment : Fragment() {
 
     private fun showLinks(genericItem: GenericItem) {
         showLoading(false)
-        linkHistoryAdapter.addLink(genericItem)
+        if (genericItem is GenericItem.UIShortenLink) {
+            binding?.layoutLastShortenedLink?.textViewShortLink?.text =
+                genericItem.linkMetadata.shortLink
+            binding?.layoutLastShortenedLink?.textViewLinkId?.text = genericItem.id
+        }
         updateView()
     }
 
@@ -135,6 +128,7 @@ class LinkHistoryFragment : Fragment() {
                     }
                 }
             }
+            binding?.root?.hideKeyboard()
         }
     }
 

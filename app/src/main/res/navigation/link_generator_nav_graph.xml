@@ -9,5 +9,14 @@
         android:id="@+id/linkHistoryFragment"
         android:name="com.tolodev.createshortenlinks.ui.fragments.LinkHistoryFragment"
         android:label="fragment_link_history"
-        tools:layout="@layout/fragment_link_history" />
+        tools:layout="@layout/fragment_link_history" >
+        <action
+            android:id="@+id/action_linkHistoryFragment_to_linkDetailFragment"
+            app:destination="@id/linkDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/linkDetailFragment"
+        android:name="com.tolodev.createshortenlinks.ui.fragments.LinkDetailFragment"
+        android:label="fragment_link_detail"
+        tools:layout="@layout/fragment_link_detail" />
 </navigation>

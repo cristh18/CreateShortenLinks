@@ -1,6 +1,5 @@
 package com.tolodev.createshortenlinks.ui.fragments
 
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.espresso.Espresso.onView
@@ -56,7 +55,8 @@ class LinkHistoryFragmentTest {
             matches(withText(""))
         )
 
-        onView(withId(R.id.recyclerView_link_history)).check(matches(isDisplayed()))
+        onView(withId(R.id.textView_link_id)).check(matches(isDisplayed()))
+        onView(withId(R.id.textView_short_link)).check(matches(isDisplayed()))
         Thread.sleep(1000)
     }
 
@@ -84,7 +84,8 @@ class LinkHistoryFragmentTest {
         )
 
         Thread.sleep(5000)
-        onView(withId(R.id.recyclerView_link_history)).check(matches(isDisplayed()))
+        onView(withId(R.id.textView_link_id)).check(matches(isDisplayed()))
+        onView(withId(R.id.textView_short_link)).check(matches(isDisplayed()))
     }
 
     @Test
@@ -109,11 +110,6 @@ class LinkHistoryFragmentTest {
     }
 
     private fun launchActivity(): ActivityScenario<MainActivity>? {
-        val activityScenario = launch(MainActivity::class.java)
-        activityScenario.onActivity { activity ->
-            (activity.findViewById(R.id.recyclerView_link_history) as RecyclerView).itemAnimator =
-                null
-        }
-        return activityScenario
+        return launch(MainActivity::class.java)
     }
 }

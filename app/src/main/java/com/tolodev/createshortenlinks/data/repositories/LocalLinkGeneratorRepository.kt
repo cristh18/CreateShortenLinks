@@ -22,4 +22,8 @@ class LocalLinkGeneratorRepository @Inject constructor(private val dataSource: L
     override fun deleteAllShortenLinks() {
         dataSource.deleteAllShortenLinks()
     }
+
+    override fun getLastShortenedLink(): ShortenLink? {
+        return dataSource.getLastShortenedLink()
+    }
 }
